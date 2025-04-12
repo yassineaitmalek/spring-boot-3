@@ -53,7 +53,7 @@ public class ProductService {
   }
 
   public List<Product> getByIdsIn(List<String> ids) {
-    return productRepository.findAllByIdIn(ids);
+    return productRepository.findAllById(ids);
   }
 
   public Product createProduct(ProductDTO productDTO) {

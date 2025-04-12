@@ -1,5 +1,6 @@
 package com.yatmk.infrastructure.services;
 
+import java.util.Objects;
 import java.util.Optional;
 
 import org.modelmapper.ModelMapper;
@@ -62,17 +63,25 @@ public class UserService {
         user.setLastName(userDTO.getLastName());
         user.setFirstName(userDTO.getFirstName());
         user.setUsername(userDTO.getUserName());
-        return userRepository.save(user);
 
+        User savedUser = userRepository.save(user);
+        userRepository.flush();
+
+        return savedUser;
     }
 
     public void deleteUser(String id) {
-        userRepository.findById(id)
+
+        Optional.ofNullable(id)
+                .flatMap(userRepository::findById)
                 .ifPresent(userRepository::delete);
     }
 
     public User updateUser(String id, UserUpdateDTO userUpdateDTO) {
 
+        if (Objects.isNull(userUpdateDTO)) {
+            throw new ServerSideException("null input");
+        }
         User user = getUserById(id);
         modelMapper.map(userUpdateDTO, user);
         return userRepository.save(user);

@@ -1,4 +1,4 @@
-package com.yatmk.infrastructure.config;
+package com.yatmk.presentation.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.lang.NonNull;

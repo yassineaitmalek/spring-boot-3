@@ -1,4 +1,4 @@
-package com.yatmk.infrastructure.config;
+package com.yatmk.presentation.config;
 
 import java.util.Arrays;
 import java.util.List;

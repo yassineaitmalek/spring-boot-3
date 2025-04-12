@@ -4,7 +4,9 @@ import java.security.Key;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 import org.springframework.stereotype.Service;
 
@@ -28,12 +30,15 @@ public class JwtService {
         return extractClaim(token, Claims::getSubject);
     }
 
-    public String extractToken(String authHeader) {
-        return authHeader.substring(7);
-    }
-
     public Date extractExpiration(String token) {
         return extractClaim(token, Claims::getExpiration);
+    }
+
+    public String extractToken(String authHeader) {
+        return Optional.ofNullable(authHeader)
+                .filter(e -> e.startsWith("Bearer "))
+                .map(e -> e.substring(7))
+                .orElseThrow(() -> new ClientSideException("authHeader is not valid"));
     }
 
     public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
@@ -41,16 +46,12 @@ public class JwtService {
     }
 
     private Claims extractAllClaims(String token) {
-        try {
-            return Jwts
-                    .parserBuilder()
-                    .setSigningKey(key)
-                    .build()
-                    .parseClaimsJws(token)
-                    .getBody();
-        } catch (Exception e) {
-            throw new ClientSideException("TOKEN EXPIRED");
-        }
+
+        return Jwts.parserBuilder()
+                .setSigningKey(key)
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
 
     }
 
@@ -60,12 +61,17 @@ public class JwtService {
 
     public boolean validateToken(String token, UserContainer userDetails) {
 
-        return (extractUserId(token).equals(userDetails.getId()) && !isTokenExpired(token));
+        return Optional.ofNullable(token)
+                .filter(Predicate.not(this::isTokenExpired))
+                .map(this::extractUserId)
+                .map(e -> e.equals(userDetails.getId()))
+                .orElseGet(() -> Boolean.FALSE);
+
     }
 
     public String generateToken(String userId) {
-        Map<String, Object> claims = new HashMap<>();
-        return createToken(claims, userId);
+
+        return createToken(new HashMap<>(), userId);
     }
 
     private String createToken(Map<String, Object> claims, String userId) {
@@ -79,7 +85,7 @@ public class JwtService {
                 .compact();
     }
 
-    public String generateRefreshToken(String userId, long now, long expirationInMillis) {
+    public String generateRefreshToken(String userId, Long now, Long expirationInMillis) {
 
         return Jwts.builder()
                 .setSubject(userId)

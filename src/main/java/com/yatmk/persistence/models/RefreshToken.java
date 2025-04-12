@@ -22,8 +22,6 @@ public class RefreshToken extends BaseEntity {
 
     private String token;
 
-    private boolean isLoggedOut;
-
     private Instant expiryDate;
 
     private String userId;
