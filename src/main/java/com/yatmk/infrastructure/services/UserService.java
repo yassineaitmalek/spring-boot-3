@@ -84,7 +84,9 @@ public class UserService {
         }
         User user = getUserById(id);
         modelMapper.map(userUpdateDTO, user);
-        return userRepository.save(user);
+        User savedUser = userRepository.save(user);
+        userRepository.flush();
+        return savedUser;
 
     }
 

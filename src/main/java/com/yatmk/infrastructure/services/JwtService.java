@@ -4,6 +4,7 @@ import java.security.Key;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import com.yatmk.infrastructure.security.service.UserContainer;
 import com.yatmk.persistence.exception.config.ClientSideException;
+import com.yatmk.persistence.exception.config.ServerSideException;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -75,6 +77,9 @@ public class JwtService {
     }
 
     private String createToken(Map<String, Object> claims, String userId) {
+        if (Objects.isNull(userId)) {
+            throw new ServerSideException("user id can not be null");
+        }
         long currentTimeMillis = System.currentTimeMillis();
         return Jwts.builder()
                 .setClaims(claims)
@@ -86,7 +91,9 @@ public class JwtService {
     }
 
     public String generateRefreshToken(String userId, Long now, Long expirationInMillis) {
-
+        if (Objects.isNull(userId)) {
+            throw new ServerSideException("user id can not be null");
+        }
         return Jwts.builder()
                 .setSubject(userId)
                 .setIssuedAt(new Date(now))

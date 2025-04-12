@@ -1,6 +1,7 @@
 package com.yatmk.persistence.models;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 
 import com.yatmk.persistence.models.config.BaseEntity;
@@ -23,10 +24,12 @@ public class CartItem extends BaseEntity {
   private Long quantity;
 
   @ManyToOne
+  @JoinColumn(name = "product_id", nullable = false)
   private Product product;
 
   @JsonIgnore
   @ManyToOne
+  @JoinColumn(name = "shoppingCart_id", nullable = false)
   private ShoppingCart shoppingCart;
 
 }

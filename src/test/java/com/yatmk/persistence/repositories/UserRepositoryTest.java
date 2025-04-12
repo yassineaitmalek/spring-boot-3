@@ -2,6 +2,7 @@ package com.yatmk.persistence.repositories;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -37,19 +38,54 @@ class UserRepositoryTest {
 
   private User user2;
 
+  private String email1;
+
+  private String email2;
+
+  private String email3;
+
+  private String password1;
+
+  private String password2;
+
+  private String password3;
+
+  private Role role1;
+
+  private Role role2;
+
+  private Role role3;
+
+  private String roleName1;
+
+  private String roleName2;
+
+  private String roleName3;
+
   @BeforeEach
   void setup() {
 
     userRepository.deleteAll();
     roleRepository.deleteAll();
-    Role role1 = Role.builder().name("role1").build();
-    Role role2 = Role.builder().name("role2").build();
-    Role role3 = Role.builder().name("role3").build();
+
+    this.roleName1 = "role1";
+    this.roleName2 = "role2";
+    this.roleName3 = "role3";
+    this.email1 = "user1@example.com";
+    this.email2 = "user2@example.com";
+    this.email3 = "user3@example.com";
+    this.password1 = "password1";
+    this.password2 = "password2";
+    this.password3 = "password3";
+
+    this.role1 = Role.builder().name(roleName1).build();
+    this.role2 = Role.builder().name(roleName2).build();
+    this.role3 = Role.builder().name(roleName3).build();
     roleRepository.saveAll(Arrays.asList(role1, role2, role3));
 
-    this.user1 = User.builder().email("user1@example.com").password("password1").roles(Arrays.asList(role1, role3))
+    this.user1 = User.builder().email(email1).password(password1).roles(Arrays.asList(role1, role3))
         .build();
-    this.user2 = User.builder().email("user2@example.com").password("password2").roles(Arrays.asList(role2)).build();
+    this.user2 = User.builder().email(email2).password(password2).roles(Arrays.asList(role2)).build();
     userRepository.saveAll(Arrays.asList(user1, user2));
 
   }
@@ -63,20 +99,20 @@ class UserRepositoryTest {
   @Test
   void testFindByEmailExists() {
 
-    assertFalse(userRepository.findTopByEmail("user1@example.com").isEmpty());
+    assertFalse(userRepository.findTopByEmail(email1).isEmpty());
 
   }
 
   @Test
   void testFindByEmailNotExists() {
 
-    assertFalse(userRepository.findTopByEmail("user3@example.com").isEmpty());
+    assertTrue(userRepository.findTopByEmail(email3).isEmpty());
 
   }
 
   @Test
   void testSaveExistingEmail() {
-    User user3 = User.builder().email("user1@example.com").password("password3").build();
+    User user3 = User.builder().email(email2).password(password3).build();
     assertThrows(DataIntegrityViolationException.class, () -> {
       userRepository.save(user3);
       userRepository.flush();
@@ -86,9 +122,9 @@ class UserRepositoryTest {
   @Test
   void testFindByEmailAndRoleExists() {
 
-    Optional<User> user = userRepository.findTopByEmail("user1@example.com");
+    Optional<User> user = userRepository.findTopByEmail(email1);
     Optional<String> role = user.map(User::getRoles).orElseGet(Collections::emptyList)
-        .stream().map(Role::getName).filter("role1"::equals).findFirst();
+        .stream().map(Role::getName).filter(roleName1::equals).findFirst();
 
     assertFalse(user.isEmpty());
     assertFalse(role.isEmpty());
